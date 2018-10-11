@@ -41,61 +41,61 @@ def output(line):
     print(line)
 
 
-def grep(lines,params):
-    lines_for_change = []
+def grep(lines, params):
+    kol = 0
+    line_row = ''
     lines_set = set()
-    for i in range(len(lines)):
-        lines_for_change.append(lines[i])
-    if params.ignore_case:
-        for i in range(len(lines)):
-            lines_for_change[i] = lines_for_change[i].lower()
-    if params.count:
-        kol = 0
-        for i in range(len(lines)):
-            lines_for_change[i] = lines_for_change[i].rstrip()
+    for line in lines:
+        line_row = line
+        if params.ignore_case:
+            line = line.lower()
+        if params.count:
+            line = line.rstrip()
             if params.invert:
-                if comparison(params.pattern,lines_for_change[i]) is False:
+                if comparison(params.pattern,line) is False:
                     kol += 1
             else:
-                if comparison(params.pattern,lines_for_change[i]) is True:
+                if comparison(params.pattern,line) is True:
                     kol += 1
-        kol = str(kol)
-        output_test(kol, params, lines)
-    else:
-        for i in range(len(lines)):
-            lines_for_change[i] = lines_for_change[i].rstrip()
+        else:
+            line = line.rstrip()
+            i = lines.index(line_row)
             if params.invert is True:
                 if params.after_context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]) is False:
+                    if comparison(params.pattern,line) is False:
                         for g in range(i, i + params.after_context + 1):
                             lines_set.add(g)
                 elif params.before_context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]) is False:
+                    if comparison(params.pattern,line) is False:
                         for g in range(i - params.before_context, i + 1):
                             lines_set.add(g)
                 elif params.context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]) is False:
+                    if comparison(params.pattern,line) is False:
                         for g in range(i - params.context, i + params.context + 1, 1):
                             lines_set.add(g)
                 else:
-                    if comparison(params.pattern,lines_for_change[i]) is False:
+                    if comparison(params.pattern,line) is False:
                         output_test(lines[i], params, lines)
             else:
                 if params.after_context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]):
+                    if comparison(params.pattern,line):
                         for g in range(i, i + params.after_context + 1):
                             lines_set.add(g)
                 elif params.before_context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]):
+                    if comparison(params.pattern,line):
                         for g in range(i - params.before_context, i + 1):
                             lines_set.add(g)
                 elif params.context >= 1:
-                    if comparison(params.pattern,lines_for_change[i]):
+                    if comparison(params.pattern,line):
                         for g in range(i - params.context, i + params.context + 1, 1):
                             lines_set.add(g)
                 else:
-                    if comparison(params.pattern,lines_for_change[i]):
+                    if comparison(params.pattern,line):
                         output_test(lines[i], params, lines)
+    if params.count:
+        kol = str(kol)
+        output_test(kol,params,lines)
+    else:
         for kol in lines_set:
             if 0 <= kol < len(lines):
                 output_test(lines[kol], params, lines)
