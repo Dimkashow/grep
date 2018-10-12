@@ -3,7 +3,7 @@ import sys
 import re
 
 
-def comparison(params,st2):
+def comparison(params, st2):
     st1 = params.pattern
     if params.ignore_case:
         st1 = st1.lower()
@@ -11,21 +11,28 @@ def comparison(params,st2):
     st1 = st1.replace('*','\w*')
     st1 = st1.replace('?','.')
     if st1 in st2:
-        return True
+        res = True
     else:
         if st1.replace('\w*','')=="":
-            return True
+            res = True
         else:
             if st1.replace('.','')=="":
                 if len(st1) <= len(st2):
-                    return True
+                    res = True
                 else:
-                    return False
+                    res = False
             else:
                 if re.search(st1,st2) is None:
-                    return False
+                    res = False
                 else:
-                    return True
+                    res = True
+    if params.invert:
+        if res:
+            return False
+        else:
+            return True
+    else:
+        return res
 
 
 def output_test(line,params,lines):
@@ -60,38 +67,21 @@ def grep(lines,params):
         else:
             line = line.rstrip()
             i = lines.index(line)
-            if params.invert is True:
-                if params.after_context >= 1:
-                    if comparison(params,line) is False:
-                        for g in range(i,i + params.after_context + 1):
-                            lines_set.add(g)
-                elif params.before_context >= 1:
-                    if comparison(params,line) is False:
-                        for g in range(i - params.before_context,i + 1):
-                            lines_set.add(g)
-                elif params.context >= 1:
-                    if comparison(params,line) is False:
-                        for g in range(i - params.context,i + params.context + 1,1):
-                            lines_set.add(g)
-                else:
-                    if comparison(params,line) is False:
-                        output_test(lines[i],params,lines)
+            if params.after_context >= 1:
+                if comparison(params,line):
+                    for g in range(i,i + params.after_context + 1):
+                        lines_set.add(g)
+            elif params.before_context >= 1:
+                if comparison(params,line):
+                    for g in range(i - params.before_context,i + 1):
+                        lines_set.add(g)
+            elif params.context >= 1:
+                if comparison(params,line):
+                    for g in range(i - params.context,i + params.context + 1,1):
+                        lines_set.add(g)
             else:
-                if params.after_context >= 1:
-                    if comparison(params,line):
-                        for g in range(i,i + params.after_context + 1):
-                            lines_set.add(g)
-                elif params.before_context >= 1:
-                    if comparison(params,line):
-                        for g in range(i - params.before_context,i + 1):
-                            lines_set.add(g)
-                elif params.context >= 1:
-                    if comparison(params,line):
-                        for g in range(i - params.context,i + params.context + 1,1):
-                            lines_set.add(g)
-                else:
-                    if comparison(params,line):
-                        output_test(lines[i],params,lines)
+                if comparison(params,line):
+                    output_test(lines[i],params,lines)
     if params.count:
         kol = str(kol)
         output_test(kol,params,lines)
