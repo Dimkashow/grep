@@ -54,42 +54,45 @@ def output(line):
 
 def grep(lines,params):
     kol = 0
-    lines_set = set()
+    next_print = 0
+    buffer = []
+    buffer_count = max(params.context,params.before_context)
+
     for line in lines:
         if params.count:
             line = line.rstrip()
-            if params.invert:
-                if comparison(params,line) is False:
-                    kol += 1
-            else:
-                if comparison(params,line) is True:
-                    kol += 1
+            if comparison(params,line):
+                kol += 1
         else:
             line = line.rstrip()
-            i = lines.index(line)
-            if params.after_context >= 1:
-                if comparison(params,line):
-                    for g in range(i,i + params.after_context + 1):
-                        lines_set.add(g)
-            elif params.before_context >= 1:
-                if comparison(params,line):
-                    for g in range(i - params.before_context,i + 1):
-                        lines_set.add(g)
-            elif params.context >= 1:
-                if comparison(params,line):
-                    for g in range(i - params.context,i + params.context + 1,1):
-                        lines_set.add(g)
+            if comparison(params,line):
+                if params.after_context or params.context:
+                    next_print = max(params.after_context,params.context)
+                if params.before_context or params.context:
+                    buffer.reverse()
+                    for out in buffer:
+                        if out != 0:
+                            output_test(out,params,lines)
+                    buffer.clear()
+                output_test(line,params,lines)
+
             else:
-                if comparison(params,line):
-                    output_test(lines[i],params,lines)
+                if next_print != 0:
+                    output_test(line,params,lines)
+                    next_print -= 1
+                    vvod = True
+                    if buffer_count != 0:
+                        buffer.insert(0,0)
+                        buffer.pop()
+                elif buffer_count != 0:
+                    if len(buffer) >= buffer_count:
+                        buffer.insert(0,line)
+                        buffer.pop()
+                    else:
+                        buffer.insert(0,line)
     if params.count:
         kol = str(kol)
         output_test(kol,params,lines)
-    if len(lines_set)!= 0:
-        for kol in lines_set:
-            if 0 <= kol < len(lines):
-                output_test(lines[kol],params,lines)
-
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description='This is a simple grep on python')
