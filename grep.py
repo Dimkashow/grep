@@ -80,11 +80,8 @@ def grep(lines,params):
                 if next_print != 0:
                     output_test(line,params,lines)
                     next_print -= 1
-                    vvod = True
-                    if buffer_count != 0:
-                        buffer.insert(0,0)
-                        buffer.pop()
-                elif buffer_count != 0:
+                    line = 0
+                if buffer_count != 0:
                     if len(buffer) >= buffer_count:
                         buffer.insert(0,line)
                         buffer.pop()
@@ -152,3 +149,4 @@ def main():
 
 if __name__=='__main__':
     main()
+
